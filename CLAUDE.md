@@ -35,9 +35,32 @@ mypy src/ceo_agent                  # Type check (strict mode)
 
 ## Key Documents
 
-**MASTER_PLAN.md is the authoritative development plan.** It supersedes DEVELOPMENT_PLAN.md, EXECUTION_PLAN.md, and TECHNICAL_BLUEPRINT.md.
+**MASTER_PLAN.md is the authoritative development plan.**
 
-Read order: START_HERE.md → MASTER_PLAN.md → scenarios/*.md
+### Document Structure (Reorganized)
+
+```
+/                           # Root (core files only)
+├── README.md, CLAUDE.md, MASTER_PLAN.md
+├── TASKS.md, REVIEWS.md, DECISIONS.md (collaboration)
+│
+docs/                       # All documentation
+├── guides/                 # Quick start guides
+├── product/                # PRD, user stories
+├── architecture/           # System architecture
+├── backend/                # Backend development
+├── frontend/               # UI design
+├── devops/                 # Deployment & operations
+├── management/             # Project management
+└── testing/                # Test plans & cases
+```
+
+### Read Order
+
+1. `docs/guides/START_HERE.md` - Getting started
+2. `MASTER_PLAN.md` - Main development plan
+3. `docs/architecture/ARCHITECTURE.md` - System architecture
+4. `scenarios/*.md` - Scenario validation
 
 ## Architecture
 

@@ -1,0 +1,54 @@
+version: 2
+updates:
+  # Python 依赖更新
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "ceoagent-team"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "pytest*"
+          - "ruff"
+          - "mypy"
+      production-dependencies:
+        dependency-type: "production"
+        patterns:
+          - "fastapi*"
+          - "uvicorn*"
+          - "anthropic*"
+          - "pydantic*"
+
+  # Docker 依赖更新
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # GitHub Actions 更新
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "github-actions"

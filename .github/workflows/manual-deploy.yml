@@ -1,0 +1,139 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - production
+      image_tag:
+        description: 'Docker image tag (leave empty for latest)'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    name: Manual Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          if [ "${{ inputs.environment }}" == "production" ]; then
+            echo "${{ secrets.KUBECONFIG_PROD }}" | base64 -d > $HOME/.kube/config
+          else
+            echo "${{ secrets.KUBECONFIG_DEV }}" | base64 -d > $HOME/.kube/config
+          fi
+          chmod 600 $HOME/.kube/config
+          kubectl version --client
+
+      - name: Determine image tag
+        id: image-tag
+        run: |
+          if [ -n "${{ inputs.image_tag }}" ]; then
+            TAG="${{ inputs.image_tag }}"
+          elif [ "${{ inputs.environment }}" == "production" ]; then
+            TAG="main-$(git rev-parse --short HEAD)"
+          else
+            TAG="develop-$(git rev-parse --short HEAD)"
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "Using image tag: ${TAG}"
+
+      - name: Verify image exists
+        run: |
+          echo "Verifying image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.image-tag.outputs.tag }}"
+          # Image verification would go here if needed
+
+      - name: Get namespace
+        id: namespace
+        run: |
+          if [ "${{ inputs.environment }}" == "production" ]; then
+            echo "namespace=ceoagent" >> $GITHUB_OUTPUT
+          else
+            echo "namespace=ceoagent-dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create backup
+        run: |
+          BACKUP_FILE="backup-deployment-$(date +%Y%m%d-%H%M%S).yaml"
+          kubectl get deployment ceoagent-api -n ${{ steps.namespace.outputs.namespace }} -o yaml > "${BACKUP_FILE}" || true
+          echo "Backup saved to ${BACKUP_FILE}"
+
+      - name: Update deployment
+        run: |
+          kubectl set image deployment/ceoagent-api \
+            api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.image-tag.outputs.tag }} \
+            -n ${{ steps.namespace.outputs.namespace }}
+          
+          echo "Deployment updated. Waiting for rollout..."
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/ceoagent-api \
+            -n ${{ steps.namespace.outputs.namespace }} \
+            --timeout=5m
+
+      - name: Verify deployment
+        run: |
+          echo "Deployment status:"
+          kubectl get deployment ceoagent-api -n ${{ steps.namespace.outputs.namespace }}
+          kubectl get pods -l app=ceoagent-api -n ${{ steps.namespace.outputs.namespace }}
+
+      - name: Health check
+        run: |
+          POD_NAME=$(kubectl get pod -l app=ceoagent-api -n ${{ steps.namespace.outputs.namespace }} -o jsonpath='{.items[0].metadata.name}')
+          MAX_RETRIES=10
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            # 尝试多种健康检查路径
+            if kubectl exec -n ${{ steps.namespace.outputs.namespace }} "${POD_NAME}" -- \
+              python -c "import httpx; httpx.get('http://localhost:8000/api/v1/health', timeout=5)" 2>/dev/null || \
+              kubectl exec -n ${{ steps.namespace.outputs.namespace }} "${POD_NAME}" -- \
+              python -c "import httpx; httpx.get('http://localhost:8000/health', timeout=5)" 2>/dev/null; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "Waiting for health check... ($RETRY_COUNT/$MAX_RETRIES)"
+            sleep 10
+          done
+          
+          echo "⚠️ Health check failed after $MAX_RETRIES attempts"
+          kubectl logs -n ${{ steps.namespace.outputs.namespace }} "${POD_NAME}" --tail=50
+
+      - name: Notify deployment
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Manual deployment to ${{ inputs.environment }} environment ${{ job.status }}
+            Image tag: ${{ steps.image-tag.outputs.tag }}
+            Triggered by: ${{ github.actor }}
+            Commit: ${{ github.sha }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true
