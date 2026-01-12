@@ -5,7 +5,7 @@ set -euo pipefail
 
 # 配置变量
 SERVER_IP="${SERVER_IP:-136.115.199.54}"
-SERVER_USER="${SERVER_USER:-root}"
+SERVER_USER="${SERVER_USER:-zouyongming}"
 SERVER_PORT="${SERVER_PORT:-22}"
 
 # SSH 选项
