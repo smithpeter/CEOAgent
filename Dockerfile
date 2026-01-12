@@ -1,6 +1,6 @@
 # 多阶段构建 Dockerfile
 # Stage 1: 构建阶段
-FROM python:3.11-slim as builder
+FROM python:3.14-slim as builder
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     if [ -f requirements-dev.txt ]; then pip install --user --no-cache-dir -r requirements-dev.txt; fi
 
 # Stage 2: 运行时阶段
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 
