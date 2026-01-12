@@ -319,18 +319,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
-
-      - name: Add server to known hosts
+      - name: Setup SSH key
         run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.SERVER_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p ${{ secrets.SERVER_SSH_PORT || 22 }} ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/deploy_key
 
       - name: Test server connection
         run: |
-          ssh -p ${{ secrets.SERVER_SSH_PORT || 22 }} ${{ secrets.SERVER_USER || 'root' }}@${{ secrets.SERVER_IP }} "echo 'Server connection successful'"
+          ssh -o StrictHostKeyChecking=accept-new -p ${{ secrets.SERVER_SSH_PORT || 22 }} ${{ secrets.SERVER_USER || 'root' }}@${{ secrets.SERVER_IP }} "echo 'Server connection successful'"
 
       - name: Deploy to server
         env:
