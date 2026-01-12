@@ -19,8 +19,14 @@ SERVER_DEPLOY_PATH="${SERVER_DEPLOY_PATH:-/opt/ceoagent}"
 SERVER_BRANCH="${1:-main}"
 ENVIRONMENT="${2:-production}"
 
+# SSH Key 路径（优先使用环境变量，否则使用默认路径）
+SSH_KEY_PATH="${SSH_KEY_PATH:-$HOME/.ssh/ceoagent_deploy}"
+
 # SSH 选项
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${SERVER_PORT}"
+if [ -f "${SSH_KEY_PATH}" ]; then
+    SSH_OPTS="-i ${SSH_KEY_PATH} ${SSH_OPTS}"
+fi
 SSH_CMD="ssh ${SSH_OPTS} ${SERVER_USER}@${SERVER_IP}"
 
 # 日志函数
