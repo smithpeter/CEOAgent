@@ -340,13 +340,9 @@ jobs:
           SERVER_DEPLOY_PATH: ${{ secrets.SERVER_DEPLOY_PATH || '/opt/ceoagent' }}
           SERVER_BRANCH: ${{ github.ref_name }}
           ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+          SSH_KEY_PATH: ~/.ssh/deploy_key
         run: |
           chmod +x scripts/deploy-server.sh
-          # 使用 SSH 私钥环境变量
-          export SSH_PRIVATE_KEY="${{ secrets.SERVER_SSH_PRIVATE_KEY }}"
-          echo "$SSH_PRIVATE_KEY" > /tmp/deploy_key
-          chmod 600 /tmp/deploy_key
-          export SSH_KEY_PATH=/tmp/deploy_key
           ./scripts/deploy-server.sh ${{ github.ref_name }} ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
 
       - name: Health check
