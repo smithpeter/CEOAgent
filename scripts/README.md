@@ -40,6 +40,67 @@ export IMAGE_TAG=v1.0.0
 - `ANTHROPIC_API_KEY`: Claude API 密钥（创建 Secret 时需要）
 - `ENCRYPTION_KEY`: 加密密钥（创建 Secret 时需要）
 
+### deploy-server.sh
+
+服务器部署脚本，通过 SSH 部署应用到服务器（136.115.199.54）。
+
+**用法**:
+```bash
+# 基本用法（部署 main 分支）
+./scripts/deploy-server.sh
+
+# 指定分支和环境
+./scripts/deploy-server.sh main production
+
+# 使用自定义配置
+export SERVER_IP=136.115.199.54
+export SERVER_USER=root
+export SERVER_PORT=22
+export SERVER_DEPLOY_PATH=/opt/ceoagent
+./scripts/deploy-server.sh main production
+```
+
+**功能**:
+- ✅ SSH 连接检查
+- ✅ 服务器前置条件检查（Docker、Git 等）
+- ✅ 自动克隆/更新代码仓库
+- ✅ 环境变量配置
+- ✅ Docker 镜像构建
+- ✅ 服务启动和健康检查
+- ✅ 部署信息显示
+
+**环境变量**:
+- `SERVER_IP`: 服务器 IP 地址（默认: 136.115.199.54）
+- `SERVER_USER`: SSH 用户名（默认: root）
+- `SERVER_PORT`: SSH 端口（默认: 22）
+- `SERVER_DEPLOY_PATH`: 部署路径（默认: /opt/ceoagent）
+
+**详细文档**: 请参考 [SERVER_DEPLOYMENT.md](../SERVER_DEPLOYMENT.md)
+
+### test-server-connection.sh
+
+测试服务器连接脚本，用于检查服务器配置和连接状态。
+
+**用法**:
+```bash
+# 基本用法
+./scripts/test-server-connection.sh
+
+# 使用自定义配置
+export SERVER_IP=136.115.199.54
+export SERVER_USER=root
+export SERVER_PORT=22
+./scripts/test-server-connection.sh
+```
+
+**功能**:
+- ✅ SSH 连接测试
+- ✅ 系统信息检查
+- ✅ Docker 和 Docker Compose 检查
+- ✅ Git 检查
+- ✅ 端口占用检查
+- ✅ 磁盘空间检查
+
 ### backup.sh
 
 数据库备份脚本，用于备份 PostgreSQL 和 Weaviate。
@@ -72,6 +133,19 @@ export NAMESPACE=ceoagent
 - Weaviate: 通过 API 备份，ID 格式为 `backup-YYYYMMDD`
 
 ## 使用示例
+
+### 部署到服务器
+
+```bash
+# 首次部署前，测试服务器连接
+./scripts/test-server-connection.sh
+
+# 部署到服务器（自动使用 main 分支）
+./scripts/deploy-server.sh
+
+# 部署指定分支
+./scripts/deploy-server.sh develop development
+```
 
 ### 部署到开发环境
 
