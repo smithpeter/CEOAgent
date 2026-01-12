@@ -1,6 +1,7 @@
 """
 Basic tests for CEOAgent project
 """
+
 import pytest
 
 
@@ -13,14 +14,14 @@ def test_import_project():
 def test_project_structure():
     """Test that project has basic structure."""
     from pathlib import Path
-    
+
     project_root = Path(__file__).parent.parent
-    
+
     # Check essential files exist
     assert (project_root / "README.md").exists()
     assert (project_root / "requirements.txt").exists()
     assert (project_root / "pyproject.toml").exists()
-    
+
     # Check essential directories exist
     assert project_root.exists()
     assert (project_root / "scripts").exists()
@@ -29,9 +30,10 @@ def test_project_structure():
 @pytest.mark.asyncio
 async def test_async_functionality():
     """Test async functionality works."""
+
     async def dummy_async():
         return True
-    
+
     result = await dummy_async()
     assert result is True
 
@@ -39,7 +41,7 @@ async def test_async_functionality():
 def test_environment_variables():
     """Test environment variable handling."""
     import os
-    
+
     # Test that we can read environment variables
     # This is a placeholder - actual tests should check specific env vars
     env_vars = os.environ
