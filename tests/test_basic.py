@@ -2,6 +2,8 @@
 Basic tests for CEOAgent project
 """
 
+from pathlib import Path
+
 import pytest
 
 
@@ -13,7 +15,6 @@ def test_import_project():
 
 def test_project_structure():
     """Test that project has basic structure."""
-    from pathlib import Path
 
     project_root = Path(__file__).parent.parent
 
