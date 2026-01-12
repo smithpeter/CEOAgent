@@ -1,0 +1,88 @@
+# Cursor + Claude Code 项目配置
+
+## 项目上下文
+这是一个 CEO 决策智能体项目，采用 Skill-based AI Agent 架构，使用 Claude Code 和 Cursor 进行开发。
+
+## 架构原则
+
+### Skill-based Agent 架构
+- 每个功能模块实现为独立的 Skill
+- Skill 必须继承 BaseSkill 基类
+- 使用 Pydantic 定义 Skill 参数
+- Skill 应该是无状态和可组合的
+- 支持异步执行和并发控制
+
+### AI Agent 技术
+- 使用 ReAct (Reasoning + Acting) 模式
+- 实现 Plan-and-Execute 架构
+- 支持 Tool Calling / Function Calling
+- 集成 RAG (Retrieval-Augmented Generation)
+- 使用向量数据库进行语义检索
+
+## 代码风格
+- 使用 Python 3.11+
+- 遵循 PEP 8 规范
+- 使用类型提示 (Type Hints)
+- 编写清晰的文档字符串（Google 风格）
+- 使用 async/await 处理异步操作
+
+## AI 助手指令
+当使用 Claude Code 时：
+1. 优先生成可测试的代码
+2. 包含完整的错误处理和日志
+3. 提供使用示例和文档
+4. 考虑性能和可扩展性
+5. 遵循 Skill-based 架构模式
+6. 使用 Pydantic 进行数据验证
+7. 实现异步操作时使用 asyncio
+
+## 项目特定要求
+
+### Skill 开发规范
+- 每个 Skill 必须包含：name, description, parameters, execute 方法
+- Skill 参数使用 Pydantic BaseModel
+- 实现参数验证（validate 方法）
+- 返回结构化结果（使用 Pydantic 模型）
+- 包含完整的错误处理
+- 添加单元测试（pytest）
+
+### API 开发规范
+- 使用 FastAPI 框架
+- API 路由使用版本控制（/api/v1/...）
+- 请求/响应使用 Pydantic 模型
+- 实现完整的 API 文档（OpenAPI/Swagger）
+- 添加认证和授权（JWT）
+- 实现请求限流
+
+### 数据与安全
+- 所有决策相关功能必须包含风险评估
+- 数据库操作使用事务支持
+- 敏感数据必须加密存储
+- 实现审计日志
+- API 接口需要完整的类型提示
+
+### AI Agent 集成
+- 使用 Claude API (Anthropic SDK)
+- 实现 Tool Calling 机制
+- 集成向量数据库（Weaviate/Pinecone）
+- 实现 RAG Pipeline
+- 支持流式响应
+
+## 测试要求
+- 单元测试覆盖率 > 80%
+- 使用 pytest 和 pytest-asyncio
+- Mock 外部依赖（API、数据库）
+- 包含集成测试
+- 使用 fixtures 组织测试数据
+
+## 开发工作流
+1. 需求理解 → 使用 Cmd+L 分析需求
+2. 代码生成 → 使用 Cmd+K 生成代码框架
+3. 迭代完善 → 使用 Cmd+L 获取优化建议
+4. 测试生成 → 使用 Cmd+L 生成测试用例
+5. 文档生成 → 使用 Cmd+L 生成文档
+
+## 参考文档
+- 开发计划：DEVELOPMENT_PLAN.md
+- 需求文档：REQUIREMENTS.md
+- 集成指南：INTEGRATION_GUIDE.md

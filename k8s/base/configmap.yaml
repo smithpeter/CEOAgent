@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ceoagent-config
+data:
+  redis-url: "redis://redis-service:6379/0"
+  weaviate-url: "http://weaviate-service:8080"
+  log-level: "INFO"
+  max-workers: "10"
+  api-timeout: "300"

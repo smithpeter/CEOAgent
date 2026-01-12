@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ceoagent-api
+  labels:
+    app: ceoagent-api
+spec:
+  type: ClusterIP
+  selector:
+    app: ceoagent-api
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP
